@@ -1,0 +1,38 @@
+networks:
+  mwws:
+    driver: bridge
+
+volumes:
+  mwws-db:
+    driver: local
+
+services:
+  db:
+    image: postgres:alpine
+    container_name: mwws-db
+    environment:
+      - TZ=Asia/Yangon
+      - POSTGRES_DB=mwws_db
+      - POSTGRES_USER=mwwsusr
+      - POSTGRES_PASSWORD=mwwspwd
+    networks:
+      - mwws
+    ports:
+      - 5432:5432
+    volumes:
+      - mwws-db:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mwws-app
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/mwws_db
+      - SPRING_DATASOURCE_USERNAME=mwwsusr
+      - SPRING_DATASOURCE_PASSWORD=mwwspwd
+    networks:
+      - mwws
+    ports:
+      - 8080:8080
+
